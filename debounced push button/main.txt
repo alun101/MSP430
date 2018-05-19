@@ -1,0 +1,91 @@
+#include <msp430.h>
+#include <stdint.h>
+#include <inttypes.h>
+#include <stdbool.h>
+
+
+
+bool debounceSwitchPush();
+bool debounceSwitchRelease();
+
+
+int main(void)
+{
+	WDTCTL = WDTPW | WDTHOLD;   				//Stop watchdog timer
+
+	 volatile bool button_state;
+	 volatile bool new_button_state;
+	 volatile bool button_changed;
+	 volatile bool button_released;
+	 volatile uint16_t i;
+
+
+	P1DIR  |= 0x01;				    // Pin 1.0 output  Pin 1.1 input
+	P1REN  |= 0x02;				    // Enable resistor on Pin 1.1
+	P1OUT  |= 0x02;				    // Set Pin 1.1 resistor as pullup
+
+	button_state = 1;
+
+		for(;;){
+		if(button_state == 1){
+			new_button_state = debounceSwitchPush();
+		}
+		else{
+			new_button_state = debounceSwitchRelease();
+		}
+
+		if(new_button_state == button_state){
+			button_changed = 0;
+		}
+		else{
+			button_changed = 1;
+		}
+
+		if(new_button_state == 0){
+			button_released = 0;
+		}
+		else{
+			button_released = 1;
+		}
+
+		if((button_released == 1) && (button_changed == 1)){
+			P1OUT ^= 0x01;
+		}
+
+		button_state = new_button_state;
+		}
+
+	return(0);
+}
+
+bool debounceSwitchPush(){			//button is 1 when released
+	volatile uint16_t debounce=0;			//button is 0 when pushed
+	volatile uint16_t i=10000;			//about 50msec?
+	
+	while(i!=0){
+		debounce = (debounce<<1)|(P1IN & 0x02)|0xE000;
+		if(debounce==0xF000){
+			return(0);		//return button state
+		}
+		i--;
+	}
+	return(1);
+}
+
+bool debounceSwitchRelease(){
+	volatile uint16_t debounce=0;
+	volatile uint16_t i=10000;
+
+	while(i!=0){
+		debounce = (debounce<<1)|(P1IN & 0x02);
+		if(debounce==0x0FFE){
+			return(1);		//return button state
+		}
+		i--;
+	}
+	return(0);
+}
+
+		
+
+		

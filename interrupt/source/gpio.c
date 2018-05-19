@@ -1,0 +1,18 @@
+/*
+ * gpio.c
+ *
+ *  Created on: 4 May 2017
+ *      Author: aevans
+ */
+ //////////////////////// includes //////////////////////////////////
+#include "project.h"
+ ////////////////////////////////////////////////////////////////////
+ //led on pin 1.0 default off
+ //led on pin 4.7 default on
+ ////////////////////////////////////////////////////////////////////
+void gpioInit(){
+   P1OUT &= ~LED1_PIN;
+   P1DIR |= LED1_PIN;
+   P4OUT |= LED2_PIN;
+   P4DIR |= LED2_PIN;
+ }

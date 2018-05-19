@@ -1,0 +1,29 @@
+
+bool debounceSwitchPush(){			//button is 1 when released
+	volatile uint16_t debounce=0;			//button is 0 when pushed
+	volatile uint16_t i=10000;			//about 50msec?
+	
+	while(i!=0){
+		debounce = (debounce<<1)|(P1IN & 0x02)|0xE000;
+		if(debounce==0xF000){
+			return(0);		//return button state
+		}
+		i--;
+	}
+	return(1);
+}
+
+bool debounceSwitchRelease(){
+	volatile uint16_t debounce=0;
+	volatile uint16_t i=10000;
+
+	while(i!=0){
+		debounce = (debounce<<1)|(P1IN & 0x02);
+		if(debounce==0x0FFE){
+			return(1);		//return button state
+		}
+		i--;
+	}
+	return(0);
+}
+	 
